@@ -1,0 +1,7 @@
+
+For more information on jabber_compomnent_framework, see http://jabber_compomnent_framework.rubyforge.org
+
+NOTE: Change this information in PostInstall.txt 
+You can also delete it if you don't want it.
+
+
