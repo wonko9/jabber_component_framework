@@ -26,6 +26,7 @@ require 'controller'
 # ===========================
 # = XXX FIXME This is dirty =
 # ===========================
+
 module Jabber::ComponentFramework
   
   def self.queue_proxy=(queue_proxy)
@@ -44,7 +45,11 @@ module Jabber::ComponentFramework
   
   class PresenceStore
     ### This is workfeed stuff!!!
-    require "#{File.dirname(__FILE__)}/../../../../config/initializers/memcache" unless defined?(CACHE)
+    begin
+      require "#{File.dirname(__FILE__)}/../../../../config/initializers/memcache" unless defined?(CACHE)
+    rescue LoadError => e
+      puts "CACHE is not defined"
+    end
     require 'memcache'
     
     def self.proxy
@@ -52,19 +57,40 @@ module Jabber::ComponentFramework
       CACHE
     end
   end
+end
 
-  class RosterItemStore
-    require "#{File.dirname(__FILE__)}/../../../../app/models/jabber_roster_item"
-    unless ActiveRecord::Base.connected?
-      dbconfig = YAML::load(File.open("#{File.dirname(__FILE__)}/../../../../config/database.yml"))  
-      ActiveRecord::Base.allow_concurrency = true
-      ActiveRecord::Base.establish_connection(dbconfig[RAILS_ENV])
-      ActiveRecord::Base.connection
+begin 
+  require 'activercord'
+  unless ActiveRecord::Base.connected?
+    dbconfig = YAML::load(File.open("#{File.dirname(__FILE__)}/../../../../config/database.yml"))  
+    ActiveRecord::Base.allow_concurrency = true
+    ActiveRecord::Base.establish_connection(dbconfig[RAILS_ENV])
+    ActiveRecord::Base.connection
+  end
+
+  class JabberRosterItem < ActiveRecord::Base  
+    record_cache :by => :jid
+
+    def subscribe!
+      self.subscribed = true
+      save
     end
+
+    def unsubscribe!
+      self.subscribed = false
+      save unless new_record?
+    end  
+  end
+rescue LoadError => e
+  "Couldn't find activerecord"
+end
+  
+module Jabber::ComponentFramework
+  class RosterItemStore
+    # require "#{File.dirname(__FILE__)}/../../../../app/models/jabber_roster_item"
 
     def self.proxy
       JabberRosterItem
     end
   end
-
 end

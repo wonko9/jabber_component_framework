@@ -5,6 +5,6 @@ irb = RUBY_PLATFORM =~ /(:?mswin|mingw)/ ? 'irb.bat' : 'irb'
 libs =  " -r irb/completion"
 # Perhaps use a console_lib to store any extra methods I may want available in the cosole
 # libs << " -r #{File.dirname(__FILE__) + '/../lib/console_lib/console_logger.rb'}"
-libs <<  " -r #{File.dirname(__FILE__) + '/../lib/jabber_compomnent_framework.rb'}"
-puts "Loading jabber_compomnent_framework gem"
+libs <<  " -r #{File.dirname(__FILE__) + '/../lib/jabber_component_framework.rb'}"
+puts "Loading jabber_component_framework gem"
 exec "#{irb} #{libs} --simple-prompt"

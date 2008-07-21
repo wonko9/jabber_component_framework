@@ -1,0 +1,19 @@
+production:
+  server: jabber.workfeed.com
+  port: 5560
+  component_jid: chat.workfeed.com
+  password: secret
+  default_user: workfeed
+  debug: true
+
+development:
+  server: localhost
+  port: 5560
+  component_jid: chat.wonko.local
+  password: secret
+  default_user: workfeed
+  debug: true
+
+test:
+
+qa:

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-GEM_NAME = 'jabber_compomnent_framework' # what ppl will type to install your gem
-RUBYFORGE_PROJECT = 'jabber_compomnent_framework'
+GEM_NAME = 'jabber_component_framework' # what ppl will type to install your gem
+RUBYFORGE_PROJECT = 'jabber_component_framework'
 
 require 'rubygems'
 begin
@@ -17,7 +17,7 @@ require 'syntax/convertors/html'
 require 'erb'
 require File.dirname(__FILE__) + "/../lib/#{GEM_NAME}/version.rb"
 
-version  = JabberCompomnentFramework::VERSION::STRING
+version  = Jabber::ComponentFramework::VERSION::STRING
 download = "http://rubyforge.org/projects/#{RUBYFORGE_PROJECT}"
 
 def rubyforge_project_id

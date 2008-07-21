@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'starling'
-require 'timeout'    
-
+require 'timeout'
 
 class QueueProxy
   

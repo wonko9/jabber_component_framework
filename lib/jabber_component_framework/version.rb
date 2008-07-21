@@ -1,4 +1,4 @@
-module JabberCompomnentFramework
+module Jabber::ComponentFramework
   module VERSION #:nodoc:
     MAJOR = 0
     MINOR = 0

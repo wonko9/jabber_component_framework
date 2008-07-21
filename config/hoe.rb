@@ -1,10 +1,13 @@
-require 'jabber_compomnent_framework/version'
+module Jabber
+end
+
+require 'jabber_component_framework/version'
 
 AUTHOR = 'Adam Pisoni'  # can also be an array of Authors
 EMAIL = "apisoni@geni.com"
 DESCRIPTION = "XMPP Component Framework"
-GEM_NAME = 'jabber_compomnent_framework' # what ppl will type to install your gem
-RUBYFORGE_PROJECT = 'jabber_compomnent_framework' # The unix name for your project
+GEM_NAME = 'jabber_component_framework' # what ppl will type to install your gem
+RUBYFORGE_PROJECT = 'jabber_component_framework' # The unix name for your project
 HOMEPATH = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 DOWNLOAD_PATH = "http://rubyforge.org/projects/#{RUBYFORGE_PROJECT}"
 EXTRA_DEPENDENCIES = [
@@ -34,8 +37,8 @@ end
 REV = nil
 # UNCOMMENT IF REQUIRED:
 # REV = YAML.load(`svn info`)['Revision']
-VERS = JabberCompomnentFramework::VERSION::STRING + (REV ? ".#{REV}" : "")
-RDOC_OPTS = ['--quiet', '--title', 'jabber_compomnent_framework documentation',
+VERS = Jabber::ComponentFramework::VERSION::STRING + (REV ? ".#{REV}" : "")
+RDOC_OPTS = ['--quiet', '--title', 'jabber_component_framework documentation',
     "--opname", "index.html",
     "--line-numbers",
     "--main", "README",

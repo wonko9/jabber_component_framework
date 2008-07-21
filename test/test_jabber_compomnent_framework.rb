@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
 
-class TestJabberCompomnentFramework < Test::Unit::TestCase
+class TestJabberComponentFramework < Test::Unit::TestCase
 
   def setup
   end
