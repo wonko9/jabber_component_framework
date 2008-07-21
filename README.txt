@@ -24,6 +24,7 @@ The downside is that your jabber server will not keep track of subscriptions/ros
 * Manages presence (for multiple resources per JID)
 * Manages rosters
 * Automatically send a subscription request when attempting to send a message to a user who you are not subscribed to.  Message is deferred until subscription confirmation is returned, at which point the original message is sent.
+* Adds some handy new methods to Jabber::JID for quickly creating presence objects
 
 == REQUIREMENTS:
 
@@ -35,8 +36,19 @@ The current script/jabber_component request ICanDaemonize http://github.com/geni
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+I wouldn't even try and install this gem yet.   
 At the moment, if you are using this within a RAILS app, it expects you will install this gem into /vendor/gems/
+
+You will need to modify config/jabber_component.yml to point to your local jabber server.
+
+./bin/jabber_component.rb start   (or try passing --ontop to see what's going on)
+
+This will create a log file in log/ for you.
+
+You can also just do it from within irb
+
+irb -r lib/jabber_component_framework.rb
+> c = Jabber::ComponentFramework::Controller.new(:server => "localhost", :component_jid => "chat.localhost", :password => "secret", :default_user => "somebot@chat.localhost", :debug => true, :log_messages_locally => true)
 
 == LICENSE:
 
