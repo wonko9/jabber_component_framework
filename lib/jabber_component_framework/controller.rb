@@ -61,7 +61,7 @@ module Jabber
         end
     
         puts "DELIVERING MESSAGE #{message.inspect}" if debug
-        roster_item = roster.find(message.to)
+        roster_item = roster.find_or_create(message.to)
         
         # XXX we've talked about having a NON persistent roster_item version.
 
