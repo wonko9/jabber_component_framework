@@ -15,15 +15,15 @@ module Jabber
       def vcard_template
         @vcard_template ||= begin
           my_vcard                 = Jabber::Vcard::IqVcard.new
-          my_vcard["FN"]           = "Workfeed"
-          my_vcard["NICKNAME"]     = "Workfeed"
-          my_vcard["ORG/ORGNAME"]  = "Workfeed Inc."          
+          my_vcard["FN"]           = "Somebot"
+          my_vcard["NICKNAME"]     = "Somebot"
+          my_vcard["ORG/ORGNAME"]  = "Somebot Inc."          
           my_vcard["BDAY"]         = "1976-06-24"          
-          my_vcard["URL"]          = "http://www.workfeed.com"
-          my_vcard["EMAIL"]        = "update@workfeed.com"
+          my_vcard["URL"]          = "http://www.mydomain.com"
+          my_vcard["EMAIL"]        = "somebot@mydomain.com"
           my_vcard["PHOTO/TYPE"]   = 'image/png'
           my_vcard["PHOTO/BINVAL"] = @avatar || AVATAR
-          my_vcard["DESC"]         = "What are you working on? I'm just trying to keep up with all of your messages!"
+          my_vcard["DESC"]         = "I like eggs"
           my_vcard
         end
       end

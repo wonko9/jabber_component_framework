@@ -44,7 +44,7 @@ module Jabber::ComponentFramework
   end
   
   class PresenceStore
-    ### This is workfeed stuff!!!
+    ### This is app specific stuff!!!  It just defines the CACHE constant as a memcache client
     begin
       require "#{File.dirname(__FILE__)}/../../../../config/initializers/memcache" unless defined?(CACHE)
     rescue LoadError => e

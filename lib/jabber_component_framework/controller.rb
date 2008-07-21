@@ -16,7 +16,7 @@ module Jabber
 
       attr_reader :delivery_thread, :client
 
-      # :server => "wonko.local", :component_jid => "chat.wonko.local", :password => "secret", :default_user => "workfeed@chat.wonko.local", :debug => true, :log_messages_locally => true
+      # :server => "localhost", :component_jid => "chat.mydomain.com", :password => "secret", :default_user => "somebot@chat.mydomain.com", :debug => true, :log_messages_locally => true
       def initialize(options)
         options = options.inject({}) do |suboptions, (key, value)|
           suboptions[key.to_sym || key] = value
@@ -125,7 +125,7 @@ module Jabber
         Jabber::ComponentFramework::ComponentJID.new(newjid)
       end
 
-      # This is workfeed specific
+      # This is app specific :(
       CLIENT_TYPE_ID = 5 
       def handle_message(message)
         case message.type
