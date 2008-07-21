@@ -63,6 +63,8 @@ module Jabber
         puts "DELIVERING MESSAGE #{message.inspect}" if debug
         roster_item = roster.find(message.to)
         
+        # XXX we've talked about having a NON persistent roster_item version.
+
         if roster_item.subscribed?
           send!(message)
         else

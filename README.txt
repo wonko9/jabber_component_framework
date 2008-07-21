@@ -18,7 +18,7 @@ These are just a few of the benefits of using a component.
 
 The downside is that your jabber server will not keep track of subscriptions/rosters/presence for you.  It is up to the component to do that.   This component framework comes with proxies for doing just that.
 
-== FEATURES/PROBLEMS:
+== FEATURES:
 
 * Manages subscriptions
 * Manages presence (for multiple resources per JID)
@@ -49,6 +49,11 @@ You can also just do it from within irb
 
 irb -r lib/jabber_component_framework.rb
 > c = Jabber::ComponentFramework::Controller.new(:server => "localhost", :component_jid => "chat.localhost", :password => "secret", :default_user => "somebot@chat.localhost", :debug => true, :log_messages_locally => true)
+
+== ISSUES:
+
+Right now the component requires the AR model JabberRosterItem to store subscription information.  We've talked about just allowing you to use memcache to store these and dealing with losing your cache.   I'm not quite sure how this would work yet though.  If you had no record of a person it was suggested you could probe them and if you don't hear
+anything back, you could send a subscription request.  The problem I see with this is what system would be watching for the LACK of a probe response in order to send the sub request.  Would it be a sep thread that just watches some list of probed people?  This doesn't seem scaleable to me.
 
 == LICENSE:
 
