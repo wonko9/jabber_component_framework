@@ -1,6 +1,4 @@
-<<<<<<< HEAD:Rakefile
 require 'rake'
-require 'yaml'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rcov/rcovtask'
@@ -40,10 +38,3 @@ Rcov::RcovTask.new do |t|
 end
 
 task :default => :rcov
-=======
-require "#{File.dirname(__FILE__)}/lib/jabber_component_framework"
-require 'config/requirements'
-require 'config/hoe' # setup Hoe + all gem configuration
-
-Dir['tasks/**/*.rake'].each { |rake| load rake }
->>>>>>> b1e95ecb6a08b358767eea88847e62c138d79a60:Rakefile
