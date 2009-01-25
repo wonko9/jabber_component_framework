@@ -1,3 +1,9 @@
+<<<<<<< HEAD:.gitignore
 *.sw?
 .DS_Store
 coverage
+=======
+*.log
+.DS_Store
+tmp/
+>>>>>>> b1e95ecb6a08b358767eea88847e62c138d79a60:.gitignore
