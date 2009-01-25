@@ -1,4 +1,5 @@
 require 'rake'
+require 'yaml'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rcov/rcovtask'
