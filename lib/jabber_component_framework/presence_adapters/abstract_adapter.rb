@@ -3,17 +3,29 @@ module Jabber::ComponentFramework::PresenceAdapters
     class NotImplementedError < StandardError; end
     
     include Jabber
-    attr_accessor :availability, :resources
+    attr_accessor :presence_data
     attr_reader :jid
     def initialize(jid,presence_data=nil)
-      @jid             = jid
-      presence_data  ||= {}
-      @resources       = presence_data[:resources] || {}
-      @availability    = presence_data[:availability] || :unknown
+      @jid                          = jid
+      @presence_data                = presence_data
+      @presence_data[:resources]    ||= {}
+      @presence_data[:availability] ||= :unknown
     end
     
-    def presence_data
-      {:resources => resources, :availability => availability}      
+    def resources
+      presence_data[:resources]
+    end    
+    
+    def resources=(resources)
+      presence_data[:resources] = resources      
+    end
+    
+    def availability
+      presence_data[:availability]
+    end
+    
+    def availability=(avail)
+      presence_data[:availability] = avail      
     end
     
     def save

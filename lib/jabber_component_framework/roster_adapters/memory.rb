@@ -20,7 +20,11 @@ module Jabber::ComponentFramework::RosterAdapters
     end
 
     def save
-      roster_item_store[jid.bare.to_s] = options
+      if roster_item_store[jid.bare.to_s]
+        roster_item_store[jid.bare.to_s].merge!(options)
+      else
+        roster_item_store[jid.bare.to_s] = options
+      end
     end
 
 
@@ -47,7 +51,7 @@ module Jabber::ComponentFramework::RosterAdapters
     end
 
     def self.deferred_messages
-      @deferred_messages || clear
+      @deferred_messages ||= Hash.new([])
     end
 
     def deferred_messages

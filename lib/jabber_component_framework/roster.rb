@@ -4,17 +4,17 @@ module Jabber
       include Jabber
 
       attr_reader :owner
-      attr_accessor :presence_adapter, :roster_adapter
+      attr_accessor :presence_adapter, :roster_adapter, :auto_subscribe
       def initialize(owner_jid,options={})
         @owner                = owner_jid
+        @auto_subscribe       = options[:auto_subscribe]
         self.roster_adapter   = options[:roster_adapter] || Jabber::ComponentFramework::RosterAdapters::Memory
         self.presence_adapter = options[:presence_adapter] || Jabber::ComponentFramework::PresenceAdapters::Memory
       end
 
       def find_or_create(jid,avail = :unsubscribed)
         jid = Jabber::JID.return_or_new(jid)
-        roster_item = find(jid)
-        roster_item || create(jid,avail)
+        find(jid) || create(jid,avail)
       end
 
       def find(jid)
@@ -22,7 +22,8 @@ module Jabber
 
         persistent_roster_item = roster_adapter.find(jid)
         return false unless persistent_roster_item
-        jid_presence = JIDPresence.new(jid,presence_adapter.find(jid))
+        presence = presence_adapter.find(jid)
+        jid_presence = JIDPresence.new(jid,presence)
 
         if not jid_presence
           # There was no record of their presence in th presence cache so we create an :unknown one
@@ -36,7 +37,8 @@ module Jabber
       alias_method :[], :find
 
       def create(jid,avail = :unsubscribed)
-        jid_presence              = JIDPresence.new(jid)
+        presence = presence_adapter.find(jid) || presence_adapter.create(jid)
+        jid_presence              = JIDPresence.new(jid,presence)
         jid_presence.availability = avail
         roster_db_item            = roster_adapter.create(jid)
         ComponentFramework::RosterItem.new(jid,jid_presence,roster_db_item)
@@ -45,8 +47,10 @@ module Jabber
       # Handle received <tt><presence/></tt> stanzas,
       # XXX Not sure if this should go in roster_item or not
       def handle_presence(pres)
-        item = self[pres.from]
-        return false unless item
+        item = self[pres.from]                      
+        item ||= create(pres.from) if auto_subscribe        
+        return unless item
+        
         case pres.type
         when :subscribed
           # XXX I wanted to pub the functionality currently in subscribed into this subscribe section

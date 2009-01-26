@@ -33,7 +33,6 @@ class TestRoster < Test::Unit::TestCase
     
     pres.type = :unsubscribe
     assert roster.handle_presence(pres)
-    ri = roster[pres.from]
     assert !ri.online?
     assert !ri.subscribed?
     

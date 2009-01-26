@@ -1,22 +1,23 @@
 module Jabber
-  module ComponentFramework
+  module ComponentFramework    
+    class ConnectionError; end
+    
     class Controller
       class InitError < StandardError; end
       include Jabber
 
       VALID_COMPONENT_SETTINGS = [:server, :port, :component_jid, :password, :default_user,
-        :debug, :log_messages_locally, :no_connect, :name,
-        :presence_adapter, :roster_item_adapter, :message_queue_adapter, :sent_message_queue_name, :received_message_queue_name
+        :debug, :log_messages_locally, :no_connect, :name, :auto_subscribe, :client,
+        :presence_adapter, :roster_item_adapter, :message_adapter
       ]
       VALID_COMPONENT_SETTINGS.each do |setting|
-        next if setting == :debug
+        next if [:debug].include?(setting)
         attr_accessor setting
       end
+      attr_reader :default_from
 
-      attr_reader :delivery_thread, :client
-
-      # :server => "wonko.local", :component_jid => "chat.wonko.local", :password => "secret", :default_user => "workfeed@chat.wonko.local", :debug => true, :log_messages_locally => true
-      def initialize(options)
+      # :server => "wonko.local", :component_jid => "chat.wonko.local", :password => "secret", :default_user => "workfeed", :debug => true, :log_messages_locally => true
+      def initialize(options={})
         options = options.inject({}) do |suboptions, (key, value)|
           suboptions[key.to_sym || key] = value
           suboptions
@@ -32,6 +33,7 @@ module Jabber
         @port                 ||= 5560
         @server               ||= 'localhost'
         @log_messages_locally ||= false
+        @default_user         ||= "component"
         @default_from           = Jabber::JID.new("#{options[:default_user]}@#{component_jid}") if options[:default_user]
 
         unless options[:no_connect]
@@ -49,10 +51,10 @@ module Jabber
           client
         end
       end
-      
+            
       def after_connect
-        client.on_exception do |exception|
-          handle_exception(exception)
+        client.on_exception do |exception,stream,where|
+          handle_exception(exception,stream,where)
         end
         register_default_callbacks
         start_message_sending_thread        
@@ -127,43 +129,37 @@ module Jabber
         RosterItem.adapter = adapter
       end
 
-      def message_queue_adapter=(adapter)
-        self.class.message_queue_adapter=(adapter)
-      end
-
-      def self.message_queue_adapter=(adapter)
-        @message_queue = adapter
-      end
-
-      def self.message_queue_adapter
-        @message_queue
-      end
-
       def start_message_sending_thread
-        return unless self.class.message_queue_adapter
-        self.class.message_queue_adapter.add_sent_message_callback(sent_message_queue_name) do |q_message|
+        return unless message_adapter
+        pp "ADAMDEBUG: start_message_sending_thread"
+        message_adapter.add_sent_message_callback do |q_message|
           deliver(q_message)
         end
       end
 
       def deliver(options={})
-        message = jabber_message_from_options(options)
-        if (!options[:stanza_type] || options[:stanza_type].to_s == "message")
-          [options[:to]].flatten.each do |to|
-            message.to = to.downcase
-            puts "DELIVERING MESSAGE #{message.inspect}" if debug
-            roster_item = roster.find_or_create(message.to)
-            if options[:ignore_subscription] or roster_item.subscribed?
-              send!(message)
-            else
-              # Request subscription if they are not subscribed
-              roster_item.add_pending_auth_message(message)
-              send! jid(message.from).auth_presence(message.to)
+        return unless options
+        if options.is_a?(Hash)
+          message = jabber_message_from_options(options)
+          if (!options[:stanza_type] || options[:stanza_type].to_s == "message")
+            [options[:to]].flatten.each do |to|
+              message.to = to.downcase
+              puts "DELIVERING MESSAGE #{message.inspect}" if debug
+              roster_item = roster.find_or_create(message.to)
+              if options[:ignore_subscription] or roster_item.subscribed?
+                send!(message)
+              else
+                # Request subscription if they are not subscribed
+                roster_item.add_pending_auth_message(message)
+                send! jid(message.from).auth_presence(message.to)
+              end
             end
+          else
+            puts "DELIVERING MESSAGE #{message.inspect}" if debug
+            send! message if message
           end
         else
-          puts "DELIVERING MESSAGE #{message.inspect}" if debug
-          send! message if message
+          send! options
         end
       end
 
@@ -199,9 +195,9 @@ module Jabber
         when :chat
           return unless message.body
           begin
-            return unless self.class.message_queue_adapter && received_message_queue_name
-            puts "ENQ #{received_message_queue_name} #{message.inspect}" if debug
-            self.class.message_queue_adapter.handle_received_message(message,received_message_queue_name)
+            return unless message_adapter
+            puts "ENQ #{message.inspect}" if debug
+            message_adapter.enqueue_received_message(message)
           rescue ConnectionError => e
             # XXX What do we do here?
             puts e.message
@@ -218,8 +214,8 @@ module Jabber
         end
       end
 
-      def handle_exception(exception)
-        puts "GOT EXCEPTION #{exception.inspect}"
+      def handle_exception(exception,stream,where)
+        puts "GOT EXCEPTION #{exception.inspect} #{stream} #{where} #{exception.backtrace.join("\n")}"
       end
 
       # XXX Maybe we should send this off to the component_jid or regular roster to handle.
@@ -274,6 +270,14 @@ module Jabber
 
       def roster(roster_jid=@default_from)
         @roster ||= ComponentFramework::Roster.new(roster_jid)
+      end
+      
+      def auto_subscribe=(op)
+        roster.auto_subscribe = op        
+      end
+      
+      def auto_subscribe
+        roster.auto_subscribe
       end
 
       def register_transport(un,pw,tjid)

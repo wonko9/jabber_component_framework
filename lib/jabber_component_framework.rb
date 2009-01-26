@@ -24,6 +24,9 @@ require 'roster_adapters/abstract_adapter'
 require 'roster_adapters/memory'
 require 'presence_adapters/abstract_adapter'
 require 'presence_adapters/memory'
+require 'message_adapters/abstract_adapter'
+require 'message_adapters/memory'
+require 'message_adapters/starling'
 
 
 

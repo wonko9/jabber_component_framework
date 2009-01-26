@@ -2,7 +2,7 @@ module Jabber
   module ComponentFramework
     class JIDPresence
 
-      attr_reader :jid
+      attr_reader :jid, :presence_item
       def initialize(jid,presence_item=nil)
         @jid = Jabber::JID.return_or_new(jid)
         @presence_item = presence_item || adapter.new(jid)        
@@ -59,9 +59,7 @@ module Jabber
       end
       
       private
-      
-      attr_reader :presence_item
-      
+            
       def resources
         presence_item.resources ||= {}
       end
