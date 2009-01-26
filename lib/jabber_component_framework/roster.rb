@@ -23,14 +23,13 @@ module Jabber
         persistent_roster_item = roster_adapter.find(jid)
         return false unless persistent_roster_item
         presence = presence_adapter.find(jid)
-        jid_presence = JIDPresence.new(jid,presence)
 
-        if not jid_presence
+        if not presence
           # There was no record of their presence in th presence cache so we create an :unknown one
-          jid_presence = JIDPresence.new(jid)
-
-          # We mark the presence as :unsubscribed instead of :unknown if they are really not subscribed
-          jid_presence.availability = :unsubscribed if not persistent_roster_item.subscribed?
+          presence_options = {:availability => :subscribed}
+          presence_options[:availability] = :unsubscribed unless persistent_roster_item.subscribed
+          presence = presence_adapter.create(jid,presence_options)
+          jid_presence = JIDPresence.new(jid,presence)
         end
         ComponentFramework::RosterItem.new(jid,jid_presence,persistent_roster_item)
       end

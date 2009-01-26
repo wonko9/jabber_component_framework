@@ -121,14 +121,6 @@ module Jabber
       alias_method :snd, :send!
       alias_method :send_xmpp, :send!
 
-      def presence_adapter=(adapter)
-        JIDPresence.adapter = adapter
-      end
-
-      def roster_item_adapter=(adapter)
-        RosterItem.adapter = adapter
-      end
-
       def start_message_sending_thread
         return unless message_adapter
         pp "ADAMDEBUG: start_message_sending_thread"
@@ -269,7 +261,7 @@ module Jabber
       end
 
       def roster(roster_jid=@default_from)
-        @roster ||= ComponentFramework::Roster.new(roster_jid)
+        @roster ||= ComponentFramework::Roster.new(roster_jid,:roster_adapter => roster_adapter, :presence_adapter => presence_adapter)
       end
       
       def auto_subscribe=(op)

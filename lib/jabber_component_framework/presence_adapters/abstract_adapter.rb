@@ -5,7 +5,7 @@ module Jabber::ComponentFramework::PresenceAdapters
     include Jabber
     attr_accessor :presence_data
     attr_reader :jid
-    def initialize(jid,presence_data=nil)
+    def initialize(jid,presence_data={})
       @jid                          = jid
       @presence_data                = presence_data
       @presence_data[:resources]    ||= {}
@@ -39,5 +39,10 @@ module Jabber::ComponentFramework::PresenceAdapters
     def self.create(jid,presence_data=nil)
       raise NotImplementedError.new("self.create must be implemented in you subclass")
     end    
+    
+    def self.find_or_create(jid,presence_data={})
+      find(jid) || create(jid,presence_data)      
+    end                        
+    
   end
 end
