@@ -14,7 +14,7 @@ module Jabber::ComponentFramework::MessageAdapters
       @received_message_queue = options[:received_message_queue]  || "xmpp_received_messages"
       @host = options[:host] || '127.0.0.1'
       @port = options[:port] || '22122'
-      @queue_client = MemCache.new("#{@host}:#{@port}")
+      @queue_client = ::Starling.new("#{@host}:#{@port}")
     end
     
     # Messages received via xmpp are enqueued here

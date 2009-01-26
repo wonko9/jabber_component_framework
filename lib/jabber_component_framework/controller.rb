@@ -6,9 +6,9 @@ module Jabber
       class InitError < StandardError; end
       include Jabber
 
-      VALID_COMPONENT_SETTINGS = [:server, :port, :component_jid, :password, :default_user,
+      VALID_COMPONENT_SETTINGS = [:host, :port, :component_jid, :password, :default_user,
         :debug, :log_messages_locally, :no_connect, :name, :auto_subscribe, :client,
-        :presence_adapter, :roster_item_adapter, :message_adapter
+        :presence_adapter, :roster_adapter, :message_adapter
       ]
       VALID_COMPONENT_SETTINGS.each do |setting|
         next if [:debug].include?(setting)
@@ -16,7 +16,7 @@ module Jabber
       end
       attr_reader :default_from
 
-      # :server => "wonko.local", :component_jid => "chat.wonko.local", :password => "secret", :default_user => "workfeed", :debug => true, :log_messages_locally => true
+      # :host => "wonko.local", :component_jid => "chat.wonko.local", :password => "secret", :default_user => "workfeed", :debug => true, :log_messages_locally => true
       def initialize(options={})
         options = options.inject({}) do |suboptions, (key, value)|
           suboptions[key.to_sym || key] = value
@@ -31,13 +31,13 @@ module Jabber
         end
 
         @port                 ||= 5560
-        @server               ||= 'localhost'
+        @host                 ||= 'localhost'
         @log_messages_locally ||= false
         @default_user         ||= "component"
         @default_from           = Jabber::JID.new("#{options[:default_user]}@#{component_jid}") if options[:default_user]
 
         unless options[:no_connect]
-          puts "Connecting to Jabber Server @ #{server}:#{port}"
+          puts "Connecting to Jabber Server @ #{host}:#{port}"
           connect!
           after_connect
         end
@@ -46,7 +46,7 @@ module Jabber
       def connect!
         @client = begin
           client = Jabber::Component.new(component_jid)
-          client.connect(server, port)
+          client.connect(host, port)
           client.auth(password)
           client
         end
@@ -150,7 +150,7 @@ module Jabber
                 send!(message)
               else
                 # Request subscription if they are not subscribed
-                roster_item.add_pending_auth_message(message)
+                roster_item.enqueue_deferred_messages(message)
                 send! jid(message.from).auth_presence(message.to)
               end
             end
