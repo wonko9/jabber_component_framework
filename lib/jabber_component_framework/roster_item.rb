@@ -13,9 +13,9 @@ module Jabber
 
       def_delegators :jid, :strip, :bare, :hash, :node, :resource, :domain, :stripped?
 
-      def enqueue_deffered_message(message)
-        persistent_roster_item.enqueue_deffered_messages([message])
-      end
+      def enqueue_deferred_messages(message)
+        persistent_roster_item.enqueue_deferred_messages([message])
+      end                  
 
       def dequeue_deferred_messages
         persistent_roster_item.dequeue_deferred_messages || []

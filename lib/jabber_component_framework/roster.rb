@@ -8,8 +8,8 @@ module Jabber
       def initialize(owner_jid,options={})
         @owner                = owner_jid
         @auto_subscribe       = options[:auto_subscribe]
-        self.roster_adapter   = options[:roster_adapter] || Jabber::ComponentFramework::RosterAdapters::Memory
-        self.presence_adapter = options[:presence_adapter] || Jabber::ComponentFramework::PresenceAdapters::Memory
+        self.roster_adapter   = options[:roster_adapter] || Jabber::ComponentFramework::RosterAdapters::Noop
+        self.presence_adapter = options[:presence_adapter] || Jabber::ComponentFramework::PresenceAdapters::Noop
       end
 
       def find_or_create(jid,avail = :unsubscribed)
@@ -29,8 +29,8 @@ module Jabber
           presence_options = {:availability => :subscribed}
           presence_options[:availability] = :unsubscribed unless persistent_roster_item.subscribed
           presence = presence_adapter.create(jid,presence_options)
-          jid_presence = JIDPresence.new(jid,presence)
         end
+        jid_presence = JIDPresence.new(jid,presence)
         ComponentFramework::RosterItem.new(jid,jid_presence,persistent_roster_item)
       end
       alias_method :[], :find
@@ -41,15 +41,15 @@ module Jabber
         jid_presence.availability = avail
         roster_db_item            = roster_adapter.create(jid)
         ComponentFramework::RosterItem.new(jid,jid_presence,roster_db_item)
-      end      
+      end
 
       # Handle received <tt><presence/></tt> stanzas,
       # XXX Not sure if this should go in roster_item or not
       def handle_presence(pres)
-        item = self[pres.from]                      
-        item ||= create(pres.from) if auto_subscribe        
+        item = self[pres.from]
+        item ||= create(pres.from) if auto_subscribe
         return unless item
-        
+
         case pres.type
         when :subscribed
           # XXX I wanted to pub the functionality currently in subscribed into this subscribe section
@@ -105,9 +105,9 @@ module Jabber
           end
           return nil
         end
-        
+
       end
-      
+
     end
   end
 end

@@ -5,13 +5,14 @@ module Jabber
     class Controller
       class InitError < StandardError; end
       include Jabber
+      extend Forwardable
 
       VALID_COMPONENT_SETTINGS = [:host, :port, :component_jid, :password, :default_user,
         :debug, :log_messages_locally, :no_connect, :name, :auto_subscribe, :client,
-        :presence_adapter, :roster_adapter, :message_adapter
+        :presence_adapter, :roster_adapter, :message_adapter, :ignore_subscriptions
       ]
       VALID_COMPONENT_SETTINGS.each do |setting|
-        next if [:debug].include?(setting)
+        next if [:debug, :presence_adapter, :roster_adapter, :auto_subscribe].include?(setting)
         attr_accessor setting
       end
       attr_reader :default_from
@@ -37,7 +38,7 @@ module Jabber
         @default_from           = Jabber::JID.new("#{options[:default_user]}@#{component_jid}") if options[:default_user]
 
         unless options[:no_connect]
-          puts "Connecting to Jabber Server @ #{host}:#{port}"
+          puts "Connecting to Jabber Server @ #{host}:#{port}" if debug
           connect!
           after_connect
         end
@@ -123,7 +124,7 @@ module Jabber
 
       def start_message_sending_thread
         return unless message_adapter
-        pp "ADAMDEBUG: start_message_sending_thread"
+        puts "start_message_sending_thread" if debug
         message_adapter.add_sent_message_callback do |q_message|
           deliver(q_message)
         end
@@ -133,26 +134,25 @@ module Jabber
         return unless options
         if options.is_a?(Hash)
           message = jabber_message_from_options(options)
-          if (!options[:stanza_type] || options[:stanza_type].to_s == "message")
-            [options[:to]].flatten.each do |to|
-              message.to = to.downcase
-              puts "DELIVERING MESSAGE #{message.inspect}" if debug
-              roster_item = roster.find_or_create(message.to)
-              if options[:ignore_subscription] or roster_item.subscribed?
-                send!(message)
-              else
-                # Request subscription if they are not subscribed
-                roster_item.enqueue_deferred_messages(message)
-                send! jid(message.from).auth_presence(message.to)
-              end
-            end
-          else
-            puts "DELIVERING MESSAGE #{message.inspect}" if debug
-            send! message if message
+          [options[:to]].flatten.each do |to|
+            message.to = to.downcase
+            deliver_or_defer(message,options)
           end
         else
-          send! options
+          deliver_or_defer(options) # options is just a message
         end
+      end
+      
+      def deliver_or_defer(message,options={})
+        roster_item = roster.find_or_create(message.to)
+        if (options.has_key?(:ignore_subscription) && options[:ignore_subscription]) || (!options.has_key?(:ignore_subscription) && self.ignore_subscriptions) || roster_item.subscribed?
+          puts "DELIVERING MESSAGE #{message.inspect}" if debug
+          send!(message)
+        else
+          # Request subscription if they are not subscribed
+          roster_item.enqueue_deferred_messages(message)
+          send! jid(message.from).auth_presence(message.to)
+        end        
       end
 
       def jabber_message_from_options(options)
@@ -261,17 +261,11 @@ module Jabber
       end
 
       def roster(roster_jid=@default_from)
-        @roster ||= ComponentFramework::Roster.new(roster_jid,:roster_adapter => roster_adapter, :presence_adapter => presence_adapter)
+        @roster ||= ComponentFramework::Roster.new(roster_jid)
       end
       
-      def auto_subscribe=(op)
-        roster.auto_subscribe = op        
-      end
+      def_delegators :roster, :roster_adapter=, :roster_adapter, :presence_adapter=, :presence_adapter, :auto_subscribe=, :auto_subscribe
       
-      def auto_subscribe
-        roster.auto_subscribe
-      end
-
       def register_transport(un,pw,tjid)
         reg = Jabber::Iq.new_register(un, pw)
         reg.to = tjid
